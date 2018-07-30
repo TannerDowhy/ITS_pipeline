@@ -7,7 +7,7 @@ args <- commandArgs(TRUE)
 path <- args[1]
 filt_path <- file.path(path, "filtered")
 merged_files <- list.files(path, pattern=".fastq")
-filterAndTrim(file.path(path, merged_files), file.path(filt_path, merged_files), rm.phix=FALSE, truncLen=183,  multithread=TRUE)
+filterAndTrim(file.path(path, merged_files), file.path(filt_path, merged_files), rm.phix=FALSE, truncLen=0,  multithread=TRUE)
 
 filts <- list.files(filt_path, pattern=".fastq", full.names=TRUE)
 sample.names <- sapply(strsplit(basename(filts), ".extended"), `[`, 1)
@@ -31,6 +31,7 @@ for(sam in sample.names) {
 }
 # Construct sequence table and write to disk
 seqtab <- makeSequenceTable(dds)
+collapseNoMismatch(seqtab)
 
 write.csv(seqtab, file=args[4])
 saveRDS(seqtab, args[5])
