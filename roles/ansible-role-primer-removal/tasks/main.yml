@@ -1,0 +1,26 @@
+---
+# tasks file for ansible-role-primer-removal
+
+- name: Create output directories
+  file: path={{ data }}/{{ item }} state=directory mode=0777
+  with_items:
+    - primer_removal
+    - primer_removal/reports
+    - primer_removal/output
+
+- name: Copy script to target machines
+  copy: src="{{ role_path }}/files/{{ item }}" dest="{{ data }}/primer_removal"
+  with_items:
+    - run_adapter.sh
+    - adapter_removal.py
+    - submit.sh
+    - touch.sh
+
+- name: Create primer file
+  copy: content="{{ primers }}" dest="{{ data }}/{{ primer_file }}/primers.fasta"
+
+- name: Generate output files for cluster
+  command: "sh {{ data }}/primer_removal/touch.sh {{ data }}"
+
+- name: Submit jobs to cluster
+  command: "sh {{ data }}/primer_removal/submit.sh {{ data }} {{ data }}/{{ primer_file }}/primers.fasta {{ qname }}"

@@ -1,0 +1,37 @@
+---
+# tasks file for ansible-role-merging
+
+- name: Clone git repository for FLASH
+  git:
+    repo: https://github.com/dstreett/FLASH2.git
+    dest: ~/bin/FLASH
+
+- name: Make FLASH
+  command: make -C ~/bin/FLASH
+
+- name: Move FLASH binary to bin
+  command: mv ~/bin/FLASH/flash2 ~/bin
+
+- name: Create output directories
+  file: path={{ data }}/{{ item }} state=directory mode=0777
+  with_items:
+    - merging
+    - merging/output
+    - merging/stdout
+
+- name: Copy scripts to target machine
+  copy: src="{{ role_path }}/files/{{ item }}" dest="{{ data }}/merging"
+  with_items:
+    - queue.sh
+    - submit.sh
+    - merge.sh
+    - touch.sh
+
+- name: Generate output files for cluster
+  command: "sh {{ data }}/merging/touch.sh {{ data }}"
+
+#- name: Wait for jobs to finish
+#  command: "sh {{ data }}/merging/queue.sh {{ name }}"
+
+- name: Submit jobs to cluster
+  command: "sh {{ data }}/merging/submit.sh {{ data }} {{ qname }}"

@@ -1,0 +1,81 @@
+---
+# tasks file for ansible-role-dada2-run
+
+- name: Create output directories
+  file: path={{ data }}/{{ item }} state=directory mode=0777
+  with_items:
+    - dada
+    - software
+
+# - name: Get the bbmap software
+#   git:
+#     repo: https://github.com/BioInfoTools/BBMap.git
+#     dest: "{{ data }}/software/BBMap"
+#
+# - name: Build bbmap suite
+#   command: "make -C {{ data }}/software/BBMap/jni -f makefile.linux"
+
+# - name: Get the bbmap software
+#   command: "wget http://sourceforge.net/projects/bbmap/files/latest/download" chdir="{{ data }}/software"
+#   retries: 3
+#   delay: 3
+#   register: command_result
+#   until: command_result.rc == 0
+
+- name: Get the bbmap software
+  command: "wget http://sourceforge.net/projects/bbmap/files/latest/download"
+  retries: 3
+  delay: 3
+  register: command_result
+  until: command_result.rc == 0
+  args:
+    chdir: "{{ data }}/software"
+
+- name: Extract bbmap
+  unarchive:
+    src: "{{ data }}/software/download"
+    dest: "{{ data }}/software"
+    remote_src: true
+
+# - name: Get the Greengenes db
+#   get_url:
+#     url: ftp://greengenes.microbio.me/greengenes_release/gg_13_5/gg_13_8_otus.tar.gz
+#     dest: "{{ data }}/software"
+#
+# - name: Extract Greengenes
+#   unarchive:
+#     src: "{{ data }}/software/gg_13_8_otus.tar.gz"
+#     dest: "{{ data }}/software"
+#     remote_src: true
+#
+# - name: Compress greengenes
+#   command: "gzip {{ data }}/software/gg_13_8_otus/repset/99_otus.fasta"
+
+- name: Copy scripts to target machine
+  copy: src="{{ role_path }}/files/{{ item }}" dest="{{ data }}/dada"
+  with_items:
+    - submit.sh
+    - _submit.sh
+    - queue.sh
+    - read_length.py
+    - dada_sample_inference.sh
+    - dada_sample_inference.R
+    - dada_chimera_taxonomy.sh
+    - dada_chimera_taxonomy.R
+    - silva_nr_v128_train_set.fa.gz
+    - combine.sh
+    - sh_general_release_dynamic_01.12.2017.fasta.gz
+
+- name: Make sure the queue is empty
+  command: "sh {{ data }}/dada/queue.sh {{ uname }}"
+
+- name: Generate Combined file
+  command: "sh {{ data }}/dada/combine.sh {{ data }}"
+
+- name: Generate histogram
+  command: "sh {{ data }}/software/bbmap/readlength.sh in={{ data }}/dada/combined.fastq out={{ data }}/dada/hist.txt bin=1"
+
+- name: Submit jobs to cluster
+  command: "sh {{ data }}/dada/submit.sh {{ data }} {{ qname }}"
+  args:
+    chdir: "{{ data }}/dada"

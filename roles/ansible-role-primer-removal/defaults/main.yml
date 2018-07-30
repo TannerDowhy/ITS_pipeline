@@ -1,0 +1,6 @@
+---
+# defaults file for ansible-role-primer-removal
+
+#data: '/home/tdowhy/scratch/lisa/lisa/test'
+primer_file: 'primer_removal/'
+#qname: 'def-linksm'

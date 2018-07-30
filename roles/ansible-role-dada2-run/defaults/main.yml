@@ -1,0 +1,5 @@
+---
+# defaults file for ansible-role-dada2-run
+
+#data: '/home/tdowhy/scratch/lisa/lisa/test'
+#qname: 'def-linksm'

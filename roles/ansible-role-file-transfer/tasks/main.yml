@@ -1,0 +1,11 @@
+---
+# tasks file for ansible-role-file-transfer
+
+- name: Copy script to target machine
+  copy: src="{{ role_path }}/files/transfer.py" dest="/home/tdowhy/scratch/test"
+
+- name: Run transfer script
+  command: python /home/tdowhy/scratch/test/transfer.py
+  register: code
+
+- debug: msg="{{ code.stdout }}"

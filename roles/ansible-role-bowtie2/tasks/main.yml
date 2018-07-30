@@ -1,0 +1,33 @@
+---
+# tasks file for ansible-role-bowtie2
+
+- name: Create output directories
+  file: path={{ data }}/{{ item }} state=directory mode=0777
+  with_items:
+    - bowtie2
+    - bowtie2/output
+    - bowtie2/sam
+
+- name: Copy scripts to target machine
+  copy: src="{{ role_path }}/files/{{ item }}" dest="{{ data }}/bowtie2"
+  with_items:
+    - queue.sh
+    - submit.sh
+    - _submit.sh
+    - bowtie2.sh
+    - touch.sh
+
+- name: Generate contaminants file
+  copy: content="{{ contams }}" dest="{{ data }}/{{ contaminants }}/contams.fasta"
+
+- name: Generate output files for cluster
+  command: "sh {{ data }}/bowtie2/touch.sh {{ data }}"
+
+- name: Load the Bowtie module
+  shell: "module load bowtie2; bowtie2-build {{ data }}/{{ contaminants }}/contams.fasta {{ data }}/bowtie2/contaminants_indx"
+
+#- name:  Make sure the queue is empty
+#  command: "sh {{ data }}/bowtie2/queue.sh {{ name }}"
+
+- name: Submit jobs to cluster
+  command: "sh {{ data }}/bowtie2/submit.sh {{ data }} {{ contaminants }} {{ qname }}"

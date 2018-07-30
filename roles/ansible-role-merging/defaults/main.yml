@@ -1,0 +1,6 @@
+---
+# defaults file for ansible-role-merging
+
+#data: '/home/tdowhy/scratch/p2irc/canola/data'
+#data: '/home/tdowhy/scratch/lisa/lisa/test'
+#qname: 'def-linksm'

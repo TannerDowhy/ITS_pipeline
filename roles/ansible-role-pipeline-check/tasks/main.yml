@@ -1,0 +1,19 @@
+---
+# tasks file for ansible-role-pipeline-check
+
+- name: Create output directory
+  file: path={{ data }}/{{ item }} state=directory mode=0777
+  with_items:
+    - pipeline_check
+
+- name: Copy scripts to target machine
+  copy: src="{{ role_path }}/files/{{ item }}" dest="{{ data }}/pipeline_check"
+  with_items:
+    - queue.sh
+    - pipeline_out.sh
+
+# - name: Make sure all the pipeline jobs are done
+#   command: "sh {{ data }}/pipeline_check/queue.sh {{ qname }} {{ job_name }}"
+
+- name: Run the pipeline check
+  command: "sh {{ data }}/pipeline_check/pipeline_out.sh {{ data }}"
