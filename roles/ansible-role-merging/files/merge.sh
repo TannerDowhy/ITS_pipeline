@@ -11,6 +11,6 @@ post=${file/_R1/_R2};
 two=${base%1_001.*};
 path=$(dirname "${1}")
 
-~/bin/flash2 -M 1000 -o $base -d "$2"/merging/output "$1" "$path/$post" > "$2"/merging/stdout/"$base".out;
+~/bin/flash2 -M 1000 -f 240 -s 50 -r 250 -o $base -d "$2"/merging/output "$1" "$path/$post" > "$2"/merging/stdout/"$base".out;
 
 exit 0;
